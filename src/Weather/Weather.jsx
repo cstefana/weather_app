@@ -1,29 +1,37 @@
 import { useState, useEffect, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import './Weather.css';
 import { wmoLabel, wmoIcon, windDir, shortDay, toDisplay, shortHour, uvLabel } from './weatherUtils';
 import { reverseGeocode, fetchForecast, geocodeCity, getCitySuggestions } from './weatherApiUtils';
-import { useWeatherStorage } from './useWeatherStorage';
+import {
+  toggleFavorite as toggleFavoriteAction,
+  removeFavorite as removeFavoriteAction,
+  addToHistory as addToHistoryAction,
+  clearHistory as clearHistoryAction,
+  selectFavorites,
+  selectHistory,
+} from '../store/itemsSlice';
+import { toggleUnit, setForecastPage as setForecastPageAction, selectUnit, selectForecastPage } from '../store/uiSlice';
 
 // Component
 export default function Weather({ onSignOut, onSignIn, userId }) {
   const [weather, setWeather]   = useState(null);
   const [location, setLocation] = useState('');
   const [currentCoords, setCurrentCoords] = useState(null); // { lat, lon } of displayed location
-  const [unit, setUnit]         = useState('celsius'); // 'celsius' | 'fahrenheit'
   const [status, setStatus]     = useState('loading'); // 'loading' | 'idle' | 'error'
   const [errorMsg, setErrorMsg] = useState('');
-  const [forecastPage, setForecastPage] = useState(0); // 0 = days 1–7, 1 = days 8–14
   const [searchQuery, setSearchQuery] = useState('');
   const [searchError, setSearchError] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const debounceRef = useRef(null);
 
-  // favorites & history (per-user, localStorage)
-  const {
-    favorites, history,
-    isFavorited, toggleFavorite, removeFavorite,
-    addToHistory, clearHistory,
-  } = useWeatherStorage(userId);
+  // Redux — persisted slices
+  const dispatch     = useDispatch();
+  const unit         = useSelector(selectUnit);
+  const forecastPage = useSelector(selectForecastPage);
+  const favorites    = useSelector(selectFavorites(userId));
+  const history      = useSelector(selectHistory(userId));
+  const isFavorited  = (label) => favorites.some((f) => f.label === label);
 
   const loadFavorite = async (fav) => {
     setLocation(fav.label);
@@ -33,8 +41,8 @@ export default function Weather({ onSignOut, onSignIn, userId }) {
       const data = await fetchForecast(fav.lat, fav.lon);
       setWeather(data);
       setStatus('idle');
-      setForecastPage(0);
-      addToHistory(fav.label, fav.lat, fav.lon);
+      dispatch(setForecastPageAction(0));
+      dispatch(addToHistoryAction({ userId, label: fav.label, lat: fav.lat, lon: fav.lon }));
     } catch {
       setStatus('error');
       setErrorMsg('Failed to fetch weather data. Please try again.');
@@ -68,8 +76,8 @@ export default function Weather({ onSignOut, onSignIn, userId }) {
       const data = await fetchForecast(suggestion.lat, suggestion.lon);
       setWeather(data);
       setStatus('idle');
-      setForecastPage(0);
-      addToHistory(suggestion.label, suggestion.lat, suggestion.lon);
+      dispatch(setForecastPageAction(0));
+      dispatch(addToHistoryAction({ userId, label: suggestion.label, lat: suggestion.lat, lon: suggestion.lon }));
     } catch {
       setStatus('error');
       setErrorMsg('Failed to fetch weather data. Please try again.');
@@ -106,9 +114,9 @@ export default function Weather({ onSignOut, onSignIn, userId }) {
       const data = await fetchForecast(lat, lon);
       setWeather(data);
       setStatus('idle');
-      setForecastPage(0);
+      dispatch(setForecastPageAction(0));
       setSearchQuery('');
-      addToHistory(label, lat, lon);
+      dispatch(addToHistoryAction({ userId, label, lat, lon }));
     } catch (err) {
       if (err.message === 'City not found') {
         setSearchError('City not found. Try a different name.');
@@ -275,7 +283,7 @@ export default function Weather({ onSignOut, onSignIn, userId }) {
               <button
                 className="wx-fav-chip-remove"
                 title="Remove from favorites"
-                onClick={() => removeFavorite(fav.label)}
+                onClick={() => dispatch(removeFavoriteAction({ userId, label: fav.label }))}
               >
                 ×
               </button>
@@ -291,7 +299,7 @@ export default function Weather({ onSignOut, onSignIn, userId }) {
           {userId && (
             <button
               className={`wx-fav-toggle${isFavorited(location) ? ' wx-fav-toggle--active' : ''}`}
-              onClick={() => toggleFavorite(location, currentCoords)}
+              onClick={() => dispatch(toggleFavoriteAction({ userId, label: location, lat: currentCoords?.lat, lon: currentCoords?.lon }))}
               title={isFavorited(location) ? 'Remove from favorites' : 'Add to favorites'}
               disabled={!currentCoords}
             >
@@ -300,7 +308,7 @@ export default function Weather({ onSignOut, onSignIn, userId }) {
           )}
           <button
             className="wx-unit-toggle"
-            onClick={() => setUnit(unit === 'celsius' ? 'fahrenheit' : 'celsius')}
+            onClick={() => dispatch(toggleUnit())}
           >
             {unit === 'celsius' ? '°F' : '°C'}
           </button>
@@ -389,13 +397,13 @@ export default function Weather({ onSignOut, onSignIn, userId }) {
           <div className="wx-forecast-pagination">
             <button
               className={`wx-page-btn${forecastPage === 0 ? ' wx-page-btn--active' : ''}`}
-              onClick={() => setForecastPage(0)}
+              onClick={() => dispatch(setForecastPageAction(0))}
             >
               Days 1-7
             </button>
             <button
               className={`wx-page-btn${forecastPage === 1 ? ' wx-page-btn--active' : ''}`}
-              onClick={() => setForecastPage(1)}
+              onClick={() => dispatch(setForecastPageAction(1))}
             >
               Days 8-14
             </button>
@@ -446,7 +454,7 @@ export default function Weather({ onSignOut, onSignIn, userId }) {
         <div className="wx-history">
           <div className="wx-history-header">
             <span>🕐 Recent searches</span>
-            <button className="wx-history-clear" onClick={clearHistory}>Clear</button>
+            <button className="wx-history-clear" onClick={() => dispatch(clearHistoryAction({ userId }))}>Clear</button>
           </div>
           <div className="wx-history-items">
             {history.map((item) => (
