@@ -2,11 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import './Weather.css';
 import { wmoLabel, wmoIcon, windDir, shortDay, toDisplay, shortHour, uvLabel } from './weatherUtils';
 import { reverseGeocode, fetchForecast, geocodeCity, getCitySuggestions } from './weatherApiUtils';
+import { useWeatherStorage } from './useWeatherStorage';
 
 // Component
-export default function Weather() {
+export default function Weather({ onSignOut, onSignIn, userId }) {
   const [weather, setWeather]   = useState(null);
   const [location, setLocation] = useState('');
+  const [currentCoords, setCurrentCoords] = useState(null); // { lat, lon } of displayed location
   const [unit, setUnit]         = useState('celsius'); // 'celsius' | 'fahrenheit'
   const [status, setStatus]     = useState('loading'); // 'loading' | 'idle' | 'error'
   const [errorMsg, setErrorMsg] = useState('');
@@ -15,6 +17,29 @@ export default function Weather() {
   const [searchError, setSearchError] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const debounceRef = useRef(null);
+
+  // favorites & history (per-user, localStorage)
+  const {
+    favorites, history,
+    isFavorited, toggleFavorite, removeFavorite,
+    addToHistory, clearHistory,
+  } = useWeatherStorage(userId);
+
+  const loadFavorite = async (fav) => {
+    setLocation(fav.label);
+    setCurrentCoords({ lat: fav.lat, lon: fav.lon });
+    setStatus('loading');
+    try {
+      const data = await fetchForecast(fav.lat, fav.lon);
+      setWeather(data);
+      setStatus('idle');
+      setForecastPage(0);
+      addToHistory(fav.label, fav.lat, fav.lon);
+    } catch {
+      setStatus('error');
+      setErrorMsg('Failed to fetch weather data. Please try again.');
+    }
+  };
 
   // debounced suggestions — no synchronous setState in effect body
   useEffect(() => {
@@ -37,12 +62,14 @@ export default function Weather() {
     setSearchQuery('');
     setSearchError('');
     setLocation(suggestion.label);
+    setCurrentCoords({ lat: suggestion.lat, lon: suggestion.lon });
     setStatus('loading');
     try {
       const data = await fetchForecast(suggestion.lat, suggestion.lon);
       setWeather(data);
       setStatus('idle');
       setForecastPage(0);
+      addToHistory(suggestion.label, suggestion.lat, suggestion.lon);
     } catch {
       setStatus('error');
       setErrorMsg('Failed to fetch weather data. Please try again.');
@@ -51,6 +78,7 @@ export default function Weather() {
 
   const fetchWeather = async (lat, lon) => {
     setStatus('loading');
+    setCurrentCoords({ lat, lon });
 
     reverseGeocode(lat, lon)
       .then(setLocation)
@@ -74,11 +102,13 @@ export default function Weather() {
     try {
       const { lat, lon, label } = await geocodeCity(searchQuery.trim());
       setLocation(label);
+      setCurrentCoords({ lat, lon });
       const data = await fetchForecast(lat, lon);
       setWeather(data);
       setStatus('idle');
       setForecastPage(0);
       setSearchQuery('');
+      addToHistory(label, lat, lon);
     } catch (err) {
       if (err.message === 'City not found') {
         setSearchError('City not found. Try a different name.');
@@ -190,6 +220,7 @@ export default function Weather() {
   }));
 
   return (
+    <>
     <div className={`wx-page ${isDay ? 'wx-day' : 'wx-night'}`}>
       {/* Search */}
       <form className="wx-search" onSubmit={handleSearch}>
@@ -226,16 +257,63 @@ export default function Weather() {
       </form>
       {searchError && <p className="wx-search-error">{searchError}</p>}
 
+      {/* Favorites bar — logged-in only */}
+      {userId && favorites.length > 0 && (
+        <div className="wx-favorites-bar">
+          <span className="wx-favorites-label">⭐ Saved</span>
+          {favorites.map(fav => (
+            <div
+              key={fav.label}
+              className={`wx-fav-chip${fav.label === location ? ' wx-fav-chip--active' : ''}`}
+            >
+              <button
+                className="wx-fav-chip-name"
+                onClick={() => loadFavorite(fav)}
+              >
+                {fav.label}
+              </button>
+              <button
+                className="wx-fav-chip-remove"
+                title="Remove from favorites"
+                onClick={() => removeFavorite(fav.label)}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="wx-left">
       <div className="wx-location">
           <span className="wx-location-icon">📍</span>
-          <span>{location}</span>
+          <span className="wx-location-name">{location}</span>
+          {userId && (
+            <button
+              className={`wx-fav-toggle${isFavorited(location) ? ' wx-fav-toggle--active' : ''}`}
+              onClick={() => toggleFavorite(location, currentCoords)}
+              title={isFavorited(location) ? 'Remove from favorites' : 'Add to favorites'}
+              disabled={!currentCoords}
+            >
+              {isFavorited(location) ? '⭐' : '☆'}
+            </button>
+          )}
           <button
             className="wx-unit-toggle"
             onClick={() => setUnit(unit === 'celsius' ? 'fahrenheit' : 'celsius')}
           >
             {unit === 'celsius' ? '°F' : '°C'}
           </button>
+          {onSignOut && (
+            <button className="wx-signout-btn" onClick={onSignOut} title="Sign out">
+              Sign Out
+            </button>
+          )}
+          {onSignIn && (
+            <button className="wx-signout-btn" onClick={onSignIn} title="Sign in">
+              Sign In
+            </button>
+          )}
       </div>
       <section className="wx-current">
         <div className="wx-main-icon">{wmoIcon(c.weather_code)}</div>
@@ -363,9 +441,31 @@ export default function Weather() {
 
       </div>{/* end wx-right */}
 
+      {/* Search history — in-page section */}
+      {userId && history.length > 0 && (
+        <div className="wx-history">
+          <div className="wx-history-header">
+            <span>🕐 Recent searches</span>
+            <button className="wx-history-clear" onClick={clearHistory}>Clear</button>
+          </div>
+          <div className="wx-history-items">
+            {history.map((item) => (
+              <button
+                key={item.label}
+                className="wx-history-item"
+                onClick={() => loadFavorite(item)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <footer className="wx-footer">
         Data provided by <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a>
       </footer>
     </div>
+  </>
   );
 }
