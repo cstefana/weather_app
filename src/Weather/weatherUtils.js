@@ -28,7 +28,7 @@ export const WMO_ICONS = {
 export const wmoLabel = (code) => WMO_DESCRIPTIONS[code] ?? 'Unknown';
 export const wmoIcon  = (code) => WMO_ICONS[code] ?? '🌡️';
 
-// Wind direction degrees → cardinal
+// Wind direction degrees -> cardinal
 export const windDir = (deg) => {
   const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
   return dirs[Math.round(deg / 45) % 8];
@@ -43,3 +43,21 @@ export const toDisplay = (celsius, unit) =>
   unit === 'celsius'
     ? `${Math.round(celsius)}°C`
     : `${Math.round(celsius * 9 / 5 + 32)}°F`;
+
+// short hour label from ISO datetime string (avoids timezone parsing issues)
+export const shortHour = (iso) => {
+  const h = parseInt(iso.slice(11, 13), 10);
+  if (h === 0) return '12am';
+  if (h < 12) return `${h}am`;
+  if (h === 12) return '12pm';
+  return `${h - 12}pm`;
+};
+
+// UV index -> risk label
+export const uvLabel = (uv) => {
+  if (uv <= 2) return 'Low';
+  if (uv <= 5) return 'Moderate';
+  if (uv <= 7) return 'High';
+  if (uv <= 10) return 'Very High';
+  return 'Extreme';
+};

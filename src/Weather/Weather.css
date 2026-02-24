@@ -15,12 +15,12 @@
   transition: background 0.6s ease;
 }
 
-/* Day gradient: deep azure → bright sky */
+/* Day gradient: deep azure -> bright sky */
 .wx-day {
   background: linear-gradient(170deg, #1565c0 0%, #1e88e5 40%, #64b5f6 75%, #b3e5fc 100%);
 }
 
-/* Night gradient: deep navy → dark indigo */
+/* Night gradient: deep navy -> dark indigo */
 .wx-night {
   background: linear-gradient(170deg, #0a0e27 0%, #1a237e 40%, #283593 75%, #3949ab 100%);
 }
@@ -29,6 +29,7 @@
   justify-content: center;
   gap: 1.5rem;
   background: linear-gradient(170deg, #1565c0, #b3e5fc);
+  text-align: center;
 }
 
 /* spinner */
@@ -73,48 +74,51 @@
 .wx-header {
   width: 100%;
   max-width: 540px;
+  position: relative;
   display: flex;
+  justify-content: center;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
+  min-height: 2.2rem;
 }
 
 .wx-location {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  font-size: 1rem;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1.2rem;
   font-weight: 600;
   opacity: 0.92;
-  flex: 1;
-  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-bottom: 1rem;
+  position: relative;
 }
-
-.wx-location-icon { flex-shrink: 0; }
 
 .wx-unit-toggle {
   flex-shrink: 0;
-  padding: 0.35rem 0.9rem;
-  border-radius: 2rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 1.5rem;
   border: 1.5px solid rgba(255,255,255,0.6);
   background: rgba(255,255,255,0.15);
   color: #fff;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.2s;
+  margin-left: 0.5rem;
 }
 .wx-unit-toggle:hover { background: rgba(255,255,255,0.25); }
 
 /* search */
 .wx-search {
   width: 100%;
-  max-width: 540px;
+  max-width: 480px;
   display: flex;
-  gap: 0.4rem;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 0.25rem;
 }
 
 .wx-search-input {
@@ -197,6 +201,16 @@
 
 .wx-suggestion-item:last-child { border-bottom: none; }
 .wx-suggestion-item:hover { background: rgba(255,255,255,0.14); }
+
+/* column wrappers — mobile: stacked, desktop: overridden to grid children */
+.wx-left,
+.wx-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  width: 100%;
+}
 
 /* current weather */
 .wx-current {
@@ -320,6 +334,22 @@
   border-color: rgba(255,255,255,0.5);
 }
 
+/* forecast labels header (desktop only mostly) */
+.wx-forecast-labels {
+  display: none; /* hidden on mobile */
+  grid-template-columns: 5rem 3.5rem 8rem 9rem 11rem 1fr 1fr;
+  padding: 0 0.5rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  margin-bottom: 0.25rem;
+  align-items: center;
+}
+.wx-text-right { text-align: right; }
+
 .wx-forecast-scroll {
   display: flex;
   flex-direction: column;
@@ -328,41 +358,84 @@
 
 .wx-forecast-day {
   display: grid;
-  grid-template-columns: 3.5rem 2rem 2.5rem 1fr 1fr;
+  grid-template-columns: 1fr auto auto;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.55rem 0.25rem;
+  gap: 0.75rem;
+  padding: 0.75rem 0.25rem;
   border-bottom: 1px solid rgba(255,255,255,0.12);
+  font-size: 1rem;
 }
 
 .wx-forecast-day:last-child { border-bottom: none; }
 
-.wx-fday-label {
-  font-size: 0.9rem;
-  font-weight: 600;
-}
+.wx-fday-label { font-weight: 600; }
+.wx-fday-icon { font-size: 1.5rem; }
 
-.wx-fday-icon { font-size: 1.2rem; text-align: center; }
-
-.wx-fday-rain {
-  font-size: 0.75rem;
-  opacity: 0.75;
-  color: #b3e5fc;
-  text-align: center;
+/* Hide extra details on mobile */
+.wx-fday-rain, .wx-fday-wind, .wx-fday-sun, .wx-fday-low {
+  display: none;
 }
 
 .wx-fday-high {
   font-weight: 700;
-  font-size: 0.9rem;
   text-align: right;
+  font-size: 1.1rem;
 }
 
-.wx-fday-low {
+.wx-stat-sublabel {
+  font-size: 0.7rem;
   font-weight: 400;
-  font-size: 0.9rem;
-  opacity: 0.65;
-  text-align: right;
+  opacity: 0.75;
 }
+
+/* hourly strip */
+.wx-hourly {
+  width: 100%;
+  max-width: 540px;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 1.25rem;
+  padding: 1rem;
+}
+
+.wx-hourly-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+  margin-bottom: 0.75rem;
+}
+
+.wx-hourly-scroll {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.wx-hourly-scroll::-webkit-scrollbar { display: none; }
+
+.wx-hourly-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.65rem;
+  flex-shrink: 0;
+  min-width: 3.2rem;
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+.wx-hourly-item:last-child { border-right: none; }
+
+.wx-hourly-time {
+  font-size: 0.7rem;
+  font-weight: 600;
+  opacity: 0.7;
+}
+.wx-hourly-icon { font-size: 1.15rem; }
+.wx-hourly-temp { font-size: 0.8rem; font-weight: 700; }
 
 /* footer */
 .wx-footer {
@@ -377,21 +450,141 @@
 @media (min-width: 540px) {
   .wx-page { padding: 2rem 1.5rem 2.5rem; gap: 1.5rem; }
 
+  .wx-left, .wx-right { gap: 1.5rem; }
+
+  .wx-header,
+  .wx-search,
+  .wx-search-error,
+  .wx-stats,
+  .wx-hourly,
+  .wx-forecast { max-width: 720px; }
+
   .wx-stats { grid-template-columns: repeat(4, 1fr); }
 
   .wx-forecast-scroll { flex-direction: row; gap: 0; }
 
+  /* Tablet: add back details */
+  .wx-fday-rain,   .wx-fday-wind,   .wx-fday-low { display: block; }
+  
   .wx-forecast-day {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto auto auto;
+    grid-template-rows: auto auto auto auto auto auto auto;
     justify-items: center;
     border-bottom: none;
     border-right: 1px solid rgba(255,255,255,0.12);
     flex: 1;
     padding: 0.5rem 0.25rem;
+    gap: 0.15rem;
+  }
+
+  .wx-fday-sun {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.65rem;
+    opacity: 0.8;
   }
 
   .wx-forecast-day:last-child { border-right: none; }
 
   .wx-fday-high, .wx-fday-low { text-align: center; }
+}
+
+@media (min-width: 900px) {
+  .wx-page {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    padding: 2.5rem 3rem;
+    gap: 0 2.5rem;
+  }
+
+  .wx-page > .wx-footer {
+    grid-column: 1 / -1;
+    margin-top: 0.5rem;
+  }
+
+  /* header and search centered at top */
+  .wx-page > .wx-header,
+  .wx-page > .wx-search,
+  .wx-page > .wx-search-error {
+    grid-column: 1 / -1;
+    max-width: none;
+    width: 100%;
+  }
+
+  .wx-page > .wx-header {
+    justify-content: center;
+  }
+
+  .wx-page > .wx-search {
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  .wx-page > .wx-search-error {
+    text-align: center;
+    padding-left: 0;
+    justify-content: center;
+    display: flex;
+  }
+
+  .wx-left,
+  .wx-right {
+    align-items: stretch;
+    gap: 1.5rem;
+  }
+
+  /* remove max-width caps — columns fill their grid cell */
+  .wx-header,
+  .wx-search,
+  .wx-search-error,
+  .wx-stats,
+  .wx-hourly,
+  .wx-forecast {
+    max-width: none;
+    width: 100%;
+    overflow: visible; /* ensure we don't clip accidentally unless intended */
+  }
+
+  /* reset forecast to vertical list inside the right panel */
+  .wx-forecast-scroll { 
+    flex-direction: column;
+    overflow-x: visible;
+    padding-bottom: 0;
+  }
+  
+  /* show header labels on desktop */
+  .wx-forecast-labels { display: grid; }
+
+  .wx-forecast-day {
+    grid-template-columns: 5rem 3.5rem 8rem 9rem 11rem 1fr 1fr;
+    justify-items: unset;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    border-right: none;
+    flex: unset;
+  /* Desktop: restore full row layout */
+  .wx-fday-sun {
+    display: flex;
+    flex-direction: row;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    opacity: 0.9;
+  }
+
+  /* ensure low is visible on desktop */
+  .wx-fday-low { display: block;   font-size: 0.85rem;
+    white-space: nowrap;
+    opacity: 0.9;
+  }
+
+  .wx-forecast-day:last-child {
+    border-bottom: none;
+    border-right: none;
+  }
+
+  .wx-fday-high, .wx-fday-low { text-align: right; }
+}
 }

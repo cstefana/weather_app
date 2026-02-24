@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import './Weather.css';
-import { wmoLabel, wmoIcon, windDir, shortDay, toDisplay } from './weatherUtils';
+import { wmoLabel, wmoIcon, windDir, shortDay, toDisplay, shortHour, uvLabel } from './weatherUtils';
 import { reverseGeocode, fetchForecast, geocodeCity, getCitySuggestions } from './weatherApiUtils';
 
 // Component
@@ -128,8 +128,8 @@ export default function Weather() {
   if (status === 'loading') {
     return (
       <div className="wx-page wx-loading">
-        <div className="wx-spinner" />
         <p>Fetching your weather…</p>
+        <div className="wx-spinner" />
       </div>
     );
   }
@@ -174,25 +174,24 @@ export default function Weather() {
 
   const c  = weather.current;
   const d  = weather.daily;
+  const h  = weather.hourly;
   const isDay = c.is_day === 1;
+
+  // Find current hour in hourly array
+  const currentHourPrefix = c.time.slice(0, 13);
+  const currentHourIdx = Math.max(0, h.time.findIndex(t => t.slice(0, 13) === currentHourPrefix));
+  const uvIndex = Math.round(h.uv_index?.[currentHourIdx] ?? 0);
+
+  // Next 24 hours for the strip
+  const hourlyWindow = h.time.slice(currentHourIdx, currentHourIdx + 24).map((t, i) => ({
+    time: t,
+    temp: h.temperature_2m[currentHourIdx + i],
+    code: h.weather_code[currentHourIdx + i],
+  }));
 
   return (
     <div className={`wx-page ${isDay ? 'wx-day' : 'wx-night'}`}>
-      {/* ── Header ── */}
-      <header className="wx-header">
-        <div className="wx-location">
-          <span className="wx-location-icon">📍</span>
-          <span>{location}</span>
-        </div>
-        <button
-          className="wx-unit-toggle"
-          onClick={() => setUnit(unit === 'celsius' ? 'fahrenheit' : 'celsius')}
-        >
-          {unit === 'celsius' ? '°F' : '°C'}
-        </button>
-      </header>
-
-      {/* ── Search ── */}
+      {/* Search */}
       <form className="wx-search" onSubmit={handleSearch}>
         <div className="wx-search-wrapper">
           <input
@@ -227,7 +226,17 @@ export default function Weather() {
       </form>
       {searchError && <p className="wx-search-error">{searchError}</p>}
 
-      {/* ── Current ── */}
+      <div className="wx-left">
+      <div className="wx-location">
+          <span className="wx-location-icon">📍</span>
+          <span>{location}</span>
+          <button
+            className="wx-unit-toggle"
+            onClick={() => setUnit(unit === 'celsius' ? 'fahrenheit' : 'celsius')}
+          >
+            {unit === 'celsius' ? '°F' : '°C'}
+          </button>
+      </div>
       <section className="wx-current">
         <div className="wx-main-icon">{wmoIcon(c.weather_code)}</div>
         <div className="wx-temp">{toDisplay(c.temperature_2m, unit)}</div>
@@ -235,7 +244,7 @@ export default function Weather() {
         <div className="wx-feels">Feels like {toDisplay(c.apparent_temperature, unit)}</div>
       </section>
 
-      {/* ── Stats grid ── */}
+      {/* Stats grid */}
       <section className="wx-stats">
         <div className="wx-stat">
           <span className="wx-stat-icon">💧</span>
@@ -257,9 +266,45 @@ export default function Weather() {
           <span className="wx-stat-value">{c.cloud_cover}%</span>
           <span className="wx-stat-label">Cloud Cover</span>
         </div>
+        <div className="wx-stat">
+          <span className="wx-stat-icon">💨</span>
+          <span className="wx-stat-value">{Math.round(c.wind_gusts_10m)} km/h</span>
+          <span className="wx-stat-label">Wind Gusts</span>
+        </div>
+        <div className="wx-stat">
+          <span className="wx-stat-icon">🌡️</span>
+          <span className="wx-stat-value">{Math.round(c.surface_pressure)} hPa</span>
+          <span className="wx-stat-label">Pressure</span>
+        </div>
+        <div className="wx-stat">
+          <span className="wx-stat-icon">👁️</span>
+          <span className="wx-stat-value">{(c.visibility / 1000).toFixed(0)} km</span>
+          <span className="wx-stat-label">Visibility</span>
+        </div>
+        <div className="wx-stat">
+          <span className="wx-stat-icon">🔆</span>
+          <span className="wx-stat-value">{uvIndex} <span className="wx-stat-sublabel">{uvLabel(uvIndex)}</span></span>
+          <span className="wx-stat-label">UV Index</span>
+        </div>
+      </section>
+      </div>{/* end wx-left */}
+
+      <div className="wx-right">
+      {/* ── Hourly strip ── */}
+      <section className="wx-hourly">
+        <h2 className="wx-hourly-title">Next 24 Hours</h2>
+        <div className="wx-hourly-scroll">
+          {hourlyWindow.map((item, i) => (
+            <div key={item.time} className="wx-hourly-item">
+              <span className="wx-hourly-time">{i === 0 ? 'Now' : shortHour(item.time)}</span>
+              <span className="wx-hourly-icon">{wmoIcon(item.code)}</span>
+              <span className="wx-hourly-temp">{toDisplay(item.temp, unit)}</span>
+            </div>
+          ))}
+        </div>
       </section>
 
-      {/* ── 14-day forecast ── */}
+      {/* 14-day forecast */}
       <section className="wx-forecast">
         <div className="wx-forecast-header">
           <h2 className="wx-forecast-title">14-Day Forecast</h2>
@@ -278,6 +323,17 @@ export default function Weather() {
             </button>
           </div>
         </div>
+        
+        <div className="wx-forecast-labels">
+          <span>Day</span>
+          <span></span>
+          <span>Rain</span>
+          <span>Wind</span>
+          <span>Sunrise - sunset</span>
+          <span className="wx-text-right">High</span>
+          <span className="wx-text-right">Low</span>
+        </div>
+
         <div className="wx-forecast-scroll">
           {d.time.slice(forecastPage * 7, forecastPage * 7 + 7).map((date, idx) => {
             const i = forecastPage * 7 + idx;
@@ -288,8 +344,15 @@ export default function Weather() {
                 </span>
                 <span className="wx-fday-icon">{wmoIcon(d.weather_code[i])}</span>
                 <span className="wx-fday-rain">
-                  {d.precipitation_probability_max[i] ?? 0}%
+                  💧 {d.precipitation_probability_max[i] ?? 0}%
                 </span>
+                <span className="wx-fday-wind">
+                  💨 {d.wind_speed_10m_max && d.wind_speed_10m_max[i] ? Math.round(d.wind_speed_10m_max[i]) : 0} <small>km/h</small>
+                </span>
+                <div className="wx-fday-sun">
+                  <span>☀️ {d.sunrise && d.sunrise[i] ? d.sunrise[i].slice(11, 16) : '--:--'}</span>
+                  <span>🌑 {d.sunset && d.sunset[i] ? d.sunset[i].slice(11, 16) : '--:--'}</span>
+                </div>
                 <span className="wx-fday-high">{toDisplay(d.temperature_2m_max[i], unit)}</span>
                 <span className="wx-fday-low">{toDisplay(d.temperature_2m_min[i], unit)}</span>
               </div>
@@ -297,6 +360,8 @@ export default function Weather() {
           })}
         </div>
       </section>
+
+      </div>{/* end wx-right */}
 
       <footer className="wx-footer">
         Data provided by <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a>
