@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import './Weather.css';
 import { wmoLabel, wmoIcon, windDir, shortDay, toDisplay } from './weatherUtils';
+import { reverseGeocode, fetchForecast } from './weatherApiUtils';
 
 // Component
 export default function Weather() {
@@ -9,52 +10,23 @@ export default function Weather() {
   const [unit, setUnit]         = useState('celsius'); // 'celsius' | 'fahrenheit'
   const [status, setStatus]     = useState('loading'); // 'loading' | 'idle' | 'error'
   const [errorMsg, setErrorMsg] = useState('');
+  const [forecastPage, setForecastPage] = useState(0); // 0 = days 1–7, 1 = days 8–14
 
-  const fetchWeather = (lat, lon) => {
+  const fetchWeather = async (lat, lon) => {
     setStatus('loading');
 
-    // Reverse geocode for city name
-    fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
-      { headers: { 'Accept-Language': 'en' } }
-    )
-      .then((r) => r.json())
-      .then((geo) => {
-        const city =
-          geo.address?.city ||
-          geo.address?.town ||
-          geo.address?.village ||
-          geo.address?.county ||
-          'Your Location';
-        const country = geo.address?.country_code?.toUpperCase() ?? '';
-        setLocation(`${city}${country ? ', ' + country : ''}`);
-      })
+    reverseGeocode(lat, lon)
+      .then(setLocation)
       .catch(() => setLocation('Your Location'));
 
-    // Open-Meteo forecast
-    const params = new URLSearchParams({
-      latitude: lat,
-      longitude: lon,
-      current: [
-        'temperature_2m', 'relative_humidity_2m', 'apparent_temperature',
-        'is_day', 'precipitation', 'weather_code', 'cloud_cover',
-        'wind_speed_10m', 'wind_direction_10m',
-      ].join(','),
-      daily: [
-        'weather_code', 'temperature_2m_max', 'temperature_2m_min',
-        'precipitation_probability_max',
-      ].join(','),
-      timezone: 'auto',
-      forecast_days: 7,
-    });
-
-    fetch(`https://api.open-meteo.com/v1/forecast?${params}`)
-      .then((r) => { if (!r.ok) throw new Error('API error'); return r.json(); })
-      .then((data) => { setWeather(data); setStatus('idle'); })
-      .catch(() => {
-        setStatus('error');
-        setErrorMsg('Failed to fetch weather data. Please try again.');
-      });
+    try {
+      const data = await fetchForecast(lat, lon);
+      setWeather(data);
+      setStatus('idle');
+    } catch {
+      setStatus('error');
+      setErrorMsg('Failed to fetch weather data. Please try again.');
+    }
   };
 
   const requestLocation = () => {
@@ -163,23 +135,42 @@ export default function Weather() {
         </div>
       </section>
 
-      {/* ── 7-day forecast ── */}
+      {/* ── 14-day forecast ── */}
       <section className="wx-forecast">
-        <h2 className="wx-forecast-title">7-Day Forecast</h2>
+        <div className="wx-forecast-header">
+          <h2 className="wx-forecast-title">14-Day Forecast</h2>
+          <div className="wx-forecast-pagination">
+            <button
+              className={`wx-page-btn${forecastPage === 0 ? ' wx-page-btn--active' : ''}`}
+              onClick={() => setForecastPage(0)}
+            >
+              Days 1–7
+            </button>
+            <button
+              className={`wx-page-btn${forecastPage === 1 ? ' wx-page-btn--active' : ''}`}
+              onClick={() => setForecastPage(1)}
+            >
+              Days 8–14
+            </button>
+          </div>
+        </div>
         <div className="wx-forecast-scroll">
-          {d.time.map((date, i) => (
-            <div key={date} className="wx-forecast-day">
-              <span className="wx-fday-label">
-                {i === 0 ? 'Today' : shortDay(date)}
-              </span>
-              <span className="wx-fday-icon">{wmoIcon(d.weather_code[i])}</span>
-              <span className="wx-fday-rain">
-                {d.precipitation_probability_max[i] ?? 0}%
-              </span>
-              <span className="wx-fday-high">{toDisplay(d.temperature_2m_max[i], unit)}</span>
-              <span className="wx-fday-low">{toDisplay(d.temperature_2m_min[i], unit)}</span>
-            </div>
-          ))}
+          {d.time.slice(forecastPage * 7, forecastPage * 7 + 7).map((date, idx) => {
+            const i = forecastPage * 7 + idx;
+            return (
+              <div key={date} className="wx-forecast-day">
+                <span className="wx-fday-label">
+                  {i === 0 ? 'Today' : shortDay(date)}
+                </span>
+                <span className="wx-fday-icon">{wmoIcon(d.weather_code[i])}</span>
+                <span className="wx-fday-rain">
+                  {d.precipitation_probability_max[i] ?? 0}%
+                </span>
+                <span className="wx-fday-high">{toDisplay(d.temperature_2m_max[i], unit)}</span>
+                <span className="wx-fday-low">{toDisplay(d.temperature_2m_min[i], unit)}</span>
+              </div>
+            );
+          })}
         </div>
       </section>
 

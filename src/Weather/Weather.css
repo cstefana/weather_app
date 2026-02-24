@@ -189,13 +189,46 @@
   padding: 1rem;
 }
 
+.wx-forecast-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
 .wx-forecast-title {
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   opacity: 0.7;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0;
+}
+
+.wx-forecast-pagination {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.wx-page-btn {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.22);
+  color: inherit;
+  border-radius: 0.5rem;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+  opacity: 0.65;
+}
+
+.wx-page-btn:hover { opacity: 1; }
+
+.wx-page-btn--active {
+  background: rgba(255,255,255,0.28);
+  opacity: 1;
+  border-color: rgba(255,255,255,0.5);
 }
 
 .wx-forecast-scroll {
