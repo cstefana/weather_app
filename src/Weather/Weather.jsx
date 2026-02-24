@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './Weather.css';
 import { wmoLabel, wmoIcon, windDir, shortDay, toDisplay } from './weatherUtils';
-import { reverseGeocode, fetchForecast } from './weatherApiUtils';
+import { reverseGeocode, fetchForecast, geocodeCity, getCitySuggestions } from './weatherApiUtils';
 
 // Component
 export default function Weather() {
@@ -11,6 +11,43 @@ export default function Weather() {
   const [status, setStatus]     = useState('loading'); // 'loading' | 'idle' | 'error'
   const [errorMsg, setErrorMsg] = useState('');
   const [forecastPage, setForecastPage] = useState(0); // 0 = days 1–7, 1 = days 8–14
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchError, setSearchError] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const debounceRef = useRef(null);
+
+  // debounced suggestions — no synchronous setState in effect body
+  useEffect(() => {
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      if (searchQuery.trim().length < 3) {
+        setSuggestions([]);
+        return;
+      }
+      const results = await getCitySuggestions(searchQuery);
+      setSuggestions(results);
+    }, 300);
+    return () => clearTimeout(debounceRef.current);
+  }, [searchQuery]);
+
+  const showSuggestions = suggestions.length > 0;
+
+  const handleSuggestionSelect = async (suggestion) => {
+    setSuggestions([]);
+    setSearchQuery('');
+    setSearchError('');
+    setLocation(suggestion.label);
+    setStatus('loading');
+    try {
+      const data = await fetchForecast(suggestion.lat, suggestion.lon);
+      setWeather(data);
+      setStatus('idle');
+      setForecastPage(0);
+    } catch {
+      setStatus('error');
+      setErrorMsg('Failed to fetch weather data. Please try again.');
+    }
+  };
 
   const fetchWeather = async (lat, lon) => {
     setStatus('loading');
@@ -26,6 +63,31 @@ export default function Weather() {
     } catch {
       setStatus('error');
       setErrorMsg('Failed to fetch weather data. Please try again.');
+    }
+  };
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    setStatus('loading');
+    setSearchError('');
+    try {
+      const { lat, lon, label } = await geocodeCity(searchQuery.trim());
+      setLocation(label);
+      const data = await fetchForecast(lat, lon);
+      setWeather(data);
+      setStatus('idle');
+      setForecastPage(0);
+      setSearchQuery('');
+    } catch (err) {
+      if (err.message === 'City not found') {
+        setSearchError('City not found. Try a different name.');
+        setStatus(weather ? 'idle' : 'error');
+        setErrorMsg('City not found. Try searching above.');
+      } else {
+        setStatus('error');
+        setErrorMsg('Failed to fetch weather data. Please try again.');
+      }
     }
   };
 
@@ -75,11 +137,38 @@ export default function Weather() {
   if (status === 'error') {
     return (
       <div className="wx-page wx-error-page">
+        <form className="wx-search" onSubmit={handleSearch}>
+          <div className="wx-search-wrapper">
+            <input
+              className="wx-search-input"
+              type="text"
+              placeholder="Search city…"
+              value={searchQuery}
+              autoComplete="off"
+              onChange={(e) => { setSearchQuery(e.target.value); setSearchError(''); }}
+              onFocus={() => {}}
+              onBlur={() => setTimeout(() => setSuggestions([]), 100)}
+            />
+            {showSuggestions && (
+              <ul className="wx-suggestions">
+                {suggestions.map((s) => (
+                  <li key={s.id} className="wx-suggestion-item" onMouseDown={() => handleSuggestionSelect(s)}>
+                    {s.label}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <button className="wx-search-btn" type="submit">🔍</button>
+        </form>
+        {searchError && <p className="wx-search-error">{searchError}</p>}
         <p className="wx-error-msg">⚠️ {errorMsg}</p>
-        <button className="wx-retry-btn" onClick={requestLocation}>Try Again</button>
+        <button className="wx-retry-btn" onClick={requestLocation}>Use My Location</button>
       </div>
     );
   }
+
+
 
   if (!weather) return null;
 
@@ -102,6 +191,41 @@ export default function Weather() {
           {unit === 'celsius' ? '°F' : '°C'}
         </button>
       </header>
+
+      {/* ── Search ── */}
+      <form className="wx-search" onSubmit={handleSearch}>
+        <div className="wx-search-wrapper">
+          <input
+            className="wx-search-input"
+            type="text"
+            placeholder="Search city…"
+            value={searchQuery}
+            autoComplete="off"
+            onChange={(e) => { setSearchQuery(e.target.value); setSearchError(''); }}
+            onFocus={() => {}}
+            onBlur={() => setTimeout(() => setSuggestions([]), 150)}
+          />
+          {showSuggestions && (
+            <ul className="wx-suggestions">
+              {suggestions.map((s) => (
+                <li key={s.id} className="wx-suggestion-item" onMouseDown={() => handleSuggestionSelect(s)}>
+                  {s.label}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <button className="wx-search-btn" type="submit">🔍</button>
+        <button
+          type="button"
+          className="wx-search-locate-btn"
+          title="Use my location"
+          onClick={() => { setSearchQuery(''); setSearchError(''); requestLocation(); }}
+        >
+          📍
+        </button>
+      </form>
+      {searchError && <p className="wx-search-error">{searchError}</p>}
 
       {/* ── Current ── */}
       <section className="wx-current">
@@ -144,13 +268,13 @@ export default function Weather() {
               className={`wx-page-btn${forecastPage === 0 ? ' wx-page-btn--active' : ''}`}
               onClick={() => setForecastPage(0)}
             >
-              Days 1–7
+              Days 1-7
             </button>
             <button
               className={`wx-page-btn${forecastPage === 1 ? ' wx-page-btn--active' : ''}`}
               onClick={() => setForecastPage(1)}
             >
-              Days 8–14
+              Days 8-14
             </button>
           </div>
         </div>
