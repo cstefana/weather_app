@@ -1,0 +1,308 @@
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* page */
+.wx-page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.25rem 1rem 2rem;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: #fff;
+  gap: 1.25rem;
+  transition: background 0.6s ease;
+}
+
+/* Day gradient: deep azure → bright sky */
+.wx-day {
+  background: linear-gradient(170deg, #1565c0 0%, #1e88e5 40%, #64b5f6 75%, #b3e5fc 100%);
+}
+
+/* Night gradient: deep navy → dark indigo */
+.wx-night {
+  background: linear-gradient(170deg, #0a0e27 0%, #1a237e 40%, #283593 75%, #3949ab 100%);
+}
+
+.wx-loading, .wx-error-page {
+  justify-content: center;
+  gap: 1.5rem;
+  background: linear-gradient(170deg, #1565c0, #b3e5fc);
+}
+
+/* spinner */
+.wx-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.wx-loading p { font-size: 1rem; opacity: 0.85; }
+
+/* error */
+.wx-error-msg {
+  font-size: 1rem;
+  background: rgba(229, 57, 53, 0.25);
+  border: 1px solid rgba(239,83,80,0.5);
+  color: #ffcdd2;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  text-align: center;
+  max-width: 320px;
+}
+
+.wx-retry-btn {
+  padding: 0.7rem 2rem;
+  border-radius: 2rem;
+  border: none;
+  background: #fff;
+  color: #1565c0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.wx-retry-btn:hover { background: #e3f2fd; transform: translateY(-1px); }
+
+/* header */
+.wx-header {
+  width: 100%;
+  max-width: 540px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.wx-location {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 0.92;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wx-location-icon { flex-shrink: 0; }
+
+.wx-unit-toggle {
+  flex-shrink: 0;
+  padding: 0.35rem 0.9rem;
+  border-radius: 2rem;
+  border: 1.5px solid rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.wx-unit-toggle:hover { background: rgba(255,255,255,0.25); }
+
+/* current weather */
+.wx-current {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 1rem 0 0.5rem;
+}
+
+.wx-main-icon { font-size: 5rem; line-height: 1; text-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+
+.wx-temp {
+  font-size: clamp(3.5rem, 12vw, 5.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+
+.wx-condition {
+  font-size: clamp(1rem, 4vw, 1.3rem);
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.wx-feels {
+  font-size: 0.875rem;
+  opacity: 0.75;
+  margin-top: 0.1rem;
+}
+
+/* stats grid */
+.wx-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 540px;
+}
+
+.wx-stat {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 1rem;
+  padding: 0.875rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  text-align: center;
+}
+
+.wx-stat-icon { font-size: 1.4rem; }
+
+.wx-stat-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.wx-stat-label {
+  font-size: 0.75rem;
+  opacity: 0.75;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* 7-day forecast */
+.wx-forecast {
+  width: 100%;
+  max-width: 540px;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 1.25rem;
+  padding: 1rem;
+}
+
+.wx-forecast-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.wx-forecast-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+  margin-bottom: 0;
+}
+
+.wx-forecast-pagination {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.wx-page-btn {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.22);
+  color: inherit;
+  border-radius: 0.5rem;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+  opacity: 0.65;
+}
+
+.wx-page-btn:hover { opacity: 1; }
+
+.wx-page-btn--active {
+  background: rgba(255,255,255,0.28);
+  opacity: 1;
+  border-color: rgba(255,255,255,0.5);
+}
+
+.wx-forecast-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.wx-forecast-day {
+  display: grid;
+  grid-template-columns: 3.5rem 2rem 2.5rem 1fr 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+
+.wx-forecast-day:last-child { border-bottom: none; }
+
+.wx-fday-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.wx-fday-icon { font-size: 1.2rem; text-align: center; }
+
+.wx-fday-rain {
+  font-size: 0.75rem;
+  opacity: 0.75;
+  color: #b3e5fc;
+  text-align: center;
+}
+
+.wx-fday-high {
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-align: right;
+}
+
+.wx-fday-low {
+  font-weight: 400;
+  font-size: 0.9rem;
+  opacity: 0.65;
+  text-align: right;
+}
+
+/* footer */
+.wx-footer {
+  font-size: 0.75rem;
+  opacity: 0.55;
+  text-align: center;
+}
+
+.wx-footer a { color: inherit; text-decoration: underline; }
+
+
+@media (min-width: 540px) {
+  .wx-page { padding: 2rem 1.5rem 2.5rem; gap: 1.5rem; }
+
+  .wx-stats { grid-template-columns: repeat(4, 1fr); }
+
+  .wx-forecast-scroll { flex-direction: row; gap: 0; }
+
+  .wx-forecast-day {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto auto;
+    justify-items: center;
+    border-bottom: none;
+    border-right: 1px solid rgba(255,255,255,0.12);
+    flex: 1;
+    padding: 0.5rem 0.25rem;
+  }
+
+  .wx-forecast-day:last-child { border-right: none; }
+
+  .wx-fday-high, .wx-fday-low { text-align: center; }
+}
