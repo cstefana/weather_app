@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import './Weather.css';
 import { wmoLabel, wmoIcon, windDir, shortDay, toDisplay, shortHour, uvLabel } from './weatherUtils';
 import { reverseGeocode, fetchForecast, geocodeCity, getCitySuggestions } from './weatherApiUtils';
+import { useWeatherStorage } from './useWeatherStorage';
 
 // Component
 export default function Weather({ onSignOut, onSignIn, userId }) {
@@ -17,51 +18,12 @@ export default function Weather({ onSignOut, onSignIn, userId }) {
   const [suggestions, setSuggestions] = useState([]);
   const debounceRef = useRef(null);
 
-  // favorites (per-user, localStorage)
-  const storageKey = userId ? `wx_favorites_${userId}` : null;
-  const [favorites, setFavorites] = useState(() => {
-    if (!storageKey) return [];
-    try { return JSON.parse(localStorage.getItem(storageKey)) ?? []; }
-    catch { return []; }
-  });
-
-  // search history (per-user, localStorage)
-  const historyKey = userId ? `wx_history_${userId}` : null;
-  const [history, setHistory] = useState(() => {
-    if (!historyKey) return [];
-    try { return JSON.parse(localStorage.getItem(historyKey)) ?? []; }
-    catch { return []; }
-  });
-
-  const addToHistory = (label, lat, lon) => {
-    if (!historyKey || !label) return;
-    const entry = { label, lat, lon };
-    const updated = [entry, ...history.filter(h => h.label !== label)].slice(0, 8);
-    setHistory(updated);
-    localStorage.setItem(historyKey, JSON.stringify(updated));
-  };
-
-  const clearHistory = () => {
-    setHistory([]);
-    if (historyKey) localStorage.removeItem(historyKey);
-  };
-
-  const isFavorited = favorites.some(f => f.label === location);
-
-  const toggleFavorite = () => {
-    if (!currentCoords || !location || !storageKey) return;
-    const updated = isFavorited
-      ? favorites.filter(f => f.label !== location)
-      : [...favorites, { label: location, lat: currentCoords.lat, lon: currentCoords.lon }];
-    setFavorites(updated);
-    localStorage.setItem(storageKey, JSON.stringify(updated));
-  };
-
-  const removeFavorite = (label) => {
-    const updated = favorites.filter(f => f.label !== label);
-    setFavorites(updated);
-    if (storageKey) localStorage.setItem(storageKey, JSON.stringify(updated));
-  };
+  // favorites & history (per-user, localStorage)
+  const {
+    favorites, history,
+    isFavorited, toggleFavorite, removeFavorite,
+    addToHistory, clearHistory,
+  } = useWeatherStorage(userId);
 
   const loadFavorite = async (fav) => {
     setLocation(fav.label);
@@ -328,12 +290,12 @@ export default function Weather({ onSignOut, onSignIn, userId }) {
           <span className="wx-location-name">{location}</span>
           {userId && (
             <button
-              className={`wx-fav-toggle${isFavorited ? ' wx-fav-toggle--active' : ''}`}
-              onClick={toggleFavorite}
-              title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+              className={`wx-fav-toggle${isFavorited(location) ? ' wx-fav-toggle--active' : ''}`}
+              onClick={() => toggleFavorite(location, currentCoords)}
+              title={isFavorited(location) ? 'Remove from favorites' : 'Add to favorites'}
               disabled={!currentCoords}
             >
-              {isFavorited ? '⭐' : '☆'}
+              {isFavorited(location) ? '⭐' : '☆'}
             </button>
           )}
           <button
