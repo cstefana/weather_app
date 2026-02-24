@@ -1,4 +1,34 @@
-/* ── Login page ── */
+/* Overlay mode */
+.login-page--overlay {
+  position: fixed;
+  inset: 0;
+  min-height: unset;
+  z-index: 1000;
+  background: rgba(13, 71, 161, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.login-close-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.login-close-btn:hover { background: rgba(255, 255, 255, 0.28); }
+
+/* Login page */
 .login-page {
   min-height: 100vh;
   display: flex;
@@ -11,6 +41,7 @@
 }
 
 .login-card {
+  position: relative;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -25,7 +56,7 @@
   gap: 1.25rem;
 }
 
-/* ── Header ── */
+/* Header */
 .login-header {
   text-align: center;
   color: #fff;
@@ -50,7 +81,7 @@
   opacity: 0.85;
 }
 
-/* ── Form ── */
+/* Form */
 .login-form {
   display: flex;
   flex-direction: column;
@@ -93,7 +124,7 @@
   background: rgba(255, 255, 255, 0.28);
 }
 
-/* ── Button ── */
+/*  Button  */
 .login-btn {
   margin-top: 0.25rem;
   padding: 0.85rem;
@@ -123,7 +154,7 @@
   cursor: not-allowed;
 }
 
-/* ── Secondary / switch-mode button ── */
+/* Secondary / switch-mode button */
 .login-btn-secondary {
   padding: 0.75rem;
   border-radius: 0.625rem;
@@ -146,7 +177,7 @@
   transform: translateY(0);
 }
 
-/* ── Error message ── */
+/* Error message */
 .login-error {
   background: rgba(229, 57, 53, 0.2);
   border: 1px solid rgba(229, 57, 53, 0.5);
@@ -157,7 +188,7 @@
   text-align: center;
 }
 
-/* ── Success message ── */
+/* Success message */
 .login-success {
   background: rgba(46, 125, 50, 0.25);
   border: 1px solid rgba(102, 187, 106, 0.5);
@@ -168,7 +199,7 @@
   text-align: center;
 }
 
-/* ── Mobile tweaks ── */
+/* Mobile tweaks */
 @media (max-width: 480px) {
   .login-card {
     padding: 2rem 1.25rem;

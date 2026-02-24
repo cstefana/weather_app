@@ -2,7 +2,7 @@ import {useState} from 'react';
 import {supabase} from '../supabaseClient';
 import './Login.css';
 
-export default function Login() {
+export default function Login({ onClose }) {
     const [mode, setMode] = useState('login'); // 'login' | 'signup'
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -31,8 +31,6 @@ export default function Login() {
 
         if (error) {
             setError(error.message);
-        } else {
-            alert('Logged in successfully!');
         }
 
         setLoading(false);
@@ -68,8 +66,13 @@ export default function Login() {
     };
 
     return (
-        <div className='login-page'>
+        <div className={`login-page${onClose ? ' login-page--overlay' : ''}`}>
             <div className='login-card'>
+                {onClose && (
+                    <button className='login-close-btn' onClick={onClose} title='Close'>
+                        ✕
+                    </button>
+                )}
                 <div className='login-header'>
                     <div className='weather-icon'>🌦</div>
                     <h1>Rain Check</h1>
