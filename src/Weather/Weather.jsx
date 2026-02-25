@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import './Weather.css';
 import { wmoLabel, wmoIcon, windDir, shortDay, toDisplay, shortHour, uvLabel } from './weatherUtils';
+import FavHistTable from './FavHistTable';
 import { reverseGeocode, fetchForecast, geocodeCity, getCitySuggestions } from './weatherApiUtils';
 import {
   toggleFavorite as toggleFavoriteAction,
@@ -25,6 +26,8 @@ export default function Weather({ onSignOut, onSignIn, userId }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchError, setSearchError] = useState('');
   const [suggestions, setSuggestions] = useState([]);
+  const [favView, setFavView]   = useState('cards');  // 'cards' | 'table'
+  const [histView, setHistView] = useState('cards');  // 'cards' | 'table'
   const debounceRef = useRef(null);
 
   // Redux — persisted slices
@@ -273,26 +276,42 @@ export default function Weather({ onSignOut, onSignIn, userId }) {
       {userId && favorites.length > 0 && (
         <div className="wx-favorites-bar">
           <span className="wx-favorites-label">⭐ Saved</span>
-          {favorites.map(fav => (
-            <div
-              key={fav.label}
-              className={`wx-fav-chip${fav.label === location ? ' wx-fav-chip--active' : ''}`}
-            >
-              <button
-                className="wx-fav-chip-name"
-                onClick={() => loadFavorite(fav)}
+          <button
+            className="wx-view-toggle"
+            onClick={() => setFavView((v) => v === 'cards' ? 'table' : 'cards')}
+            title={favView === 'cards' ? 'Switch to table view' : 'Switch to card view'}
+          >{favView === 'cards' ? 'Table' : 'Cards'}</button>
+
+          {favView === 'cards' ? (
+            favorites.map(fav => (
+              <div
+                key={fav.label}
+                className={`wx-fav-chip${fav.label === location ? ' wx-fav-chip--active' : ''}`}
               >
-                {fav.label}
-              </button>
-              <button
-                className="wx-fav-chip-remove"
-                title="Remove from favorites"
-                onClick={() => dispatch(removeFavoriteAction({ userId, label: fav.label }))}
-              >
-                ×
-              </button>
+                <button
+                  className="wx-fav-chip-name"
+                  onClick={() => loadFavorite(fav)}
+                >
+                  {fav.label}
+                </button>
+                <button
+                  className="wx-fav-chip-remove"
+                  title="Remove from favorites"
+                  onClick={() => dispatch(removeFavoriteAction({ userId, label: fav.label }))}
+                >
+                  ×
+                </button>
+              </div>
+            ))
+          ) : (
+            <div style={{ width: '100%' }}>
+              <FavHistTable
+                data={favorites}
+                onLoad={loadFavorite}
+                onRemove={(label) => dispatch(removeFavoriteAction({ userId, label }))}
+              />
             </div>
-          ))}
+          )}
         </div>
       )}
 
@@ -466,19 +485,34 @@ export default function Weather({ onSignOut, onSignIn, userId }) {
         <div className="wx-history">
           <div className="wx-history-header">
             <span>🕐 Recent searches</span>
-            <button className="wx-history-clear" onClick={() => dispatch(clearHistoryAction({ userId }))}>Clear</button>
-          </div>
-          <div className="wx-history-items">
-            {history.map((item) => (
+            <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
               <button
-                key={item.label}
-                className="wx-history-item"
-                onClick={() => loadFavorite(item)}
-              >
-                {item.label}
-              </button>
-            ))}
+                className="wx-view-toggle"
+                onClick={() => setHistView((v) => v === 'cards' ? 'table' : 'cards')}
+                title={histView === 'cards' ? 'Switch to table view' : 'Switch to card view'}
+              >{histView === 'cards' ? 'Table' : 'Cards'}</button>
+              <button className="wx-history-clear" onClick={() => dispatch(clearHistoryAction({ userId }))}>Clear</button>
+            </div>
           </div>
+
+          {histView === 'cards' ? (
+            <div className="wx-history-items">
+              {history.map((item) => (
+                <button
+                  key={item.label}
+                  className="wx-history-item"
+                  onClick={() => loadFavorite(item)}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <FavHistTable
+              data={history}
+              onLoad={loadFavorite}
+            />
+          )}
         </div>
       )}
 
