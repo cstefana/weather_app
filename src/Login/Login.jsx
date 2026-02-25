@@ -52,6 +52,9 @@ export default function Login({ onClose }) {
 
         if (error) {
             setError(error.message);
+        } else if (data.user && data.user.identities && data.user.identities.length === 0) {
+            // Supabase returns a fake user with empty identities when the email already exists
+            setError('An account with this email already exists. Please log in instead.');
         } else {
             // if data.user exists but session is null, they need to confirm email
             if (data.user && !data.session) {
