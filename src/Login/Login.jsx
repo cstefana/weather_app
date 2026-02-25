@@ -75,7 +75,7 @@ export default function Login({ onClose }) {
                 )}
                 <div className='login-header'>
                     <div className='weather-icon'>🌦</div>
-                    <h1>Rain Check</h1>
+                    <h1>RainCheck</h1>
                     <p>
                         {mode === 'login'
                             ? 'The only app that encourages you to cancel plans.'
