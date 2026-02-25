@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import './Weather.css';
 import { wmoLabel, wmoIcon, windDir, shortDay, toDisplay, shortHour, uvLabel } from './weatherUtils';
 import { reverseGeocode, fetchForecast, geocodeCity, getCitySuggestions } from './weatherApiUtils';
@@ -27,6 +28,7 @@ export default function Weather({ onSignOut, onSignIn, userId }) {
 
   // Redux — persisted slices
   const dispatch     = useDispatch();
+  const navigate     = useNavigate();
   const unit         = useSelector(selectUnit);
   const forecastPage = useSelector(selectForecastPage);
   const favorites    = useSelector(selectFavorites(userId));
@@ -322,6 +324,9 @@ export default function Weather({ onSignOut, onSignIn, userId }) {
               Sign In
             </button>
           )}
+          <button className="wx-signout-btn" onClick={() => navigate('/contact')} title="Contact">
+            Contact
+          </button>
       </div>
       <section className="wx-current">
         <div className="wx-main-icon">{wmoIcon(c.weather_code)}</div>

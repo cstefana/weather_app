@@ -7,6 +7,7 @@ import { setShowLogin, selectShowLogin } from './store/uiSlice';
 import Landing from './Landing/Landing.jsx';
 import Login from './Login/Login.jsx';
 import Weather from './Weather/Weather.jsx';
+import Contact from './Contact/Contact.jsx';
 
 export default function App() {
   const dispatch   = useDispatch();
@@ -59,6 +60,7 @@ export default function App() {
             />
           }
         />
+        <Route path="/contact" element={<Contact />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {showLogin && <Login onClose={() => dispatch(setShowLogin(false))} />}

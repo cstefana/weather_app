@@ -17,7 +17,7 @@ export default function Landing() {
     <div className="land-page">
       {/* Hero */}
       <section className="land-hero">
-        <h1 className="land-hero-title">Ready to check the weather?</h1>
+        <h1 className="land-hero-title">Ready to check the weather? Use RainCheck.</h1>
         <div className="land-hero-actions">
           <button className="land-cta land-cta--primary" onClick={() => navigate('/login')}>
             Sign In
@@ -45,6 +45,8 @@ export default function Landing() {
 
       <footer className="land-footer">
         <span>Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a></span>
+        <span className="land-footer-sep">·</span>
+        <button className="land-footer-link" onClick={() => navigate('/contact')}>Contact</button>
       </footer>
     </div>
   );
