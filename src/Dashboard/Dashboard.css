@@ -1,0 +1,139 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+.dashboard-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2.5rem 1rem;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: linear-gradient(170deg, #0d2b6e 0%, #1565c0 35%, #1e88e5 65%, #64b5f6 100%);
+}
+
+/* Card */
+.dashboard-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 1.4rem;
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 860px;
+  color: #fff;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+}
+
+/* Header row */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+
+.dashboard-header h2 {
+  font-size: 1.7rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.dashboard-subtitle {
+  font-size: 0.9rem;
+  opacity: 0.65;
+  margin-bottom: 2rem;
+}
+
+/* Back button */
+.back-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 2rem;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.35rem 1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.back-btn:hover { background: rgba(255, 255, 255, 0.25); }
+
+/* Table wrapper */
+.table-responsive {
+  overflow-x: auto;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.users-table th {
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.75;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.users-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  word-break: break-all;
+}
+
+.users-table tr:last-child td {
+  border-bottom: none;
+}
+
+.users-table tr:hover td {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Role badges */
+.role-badge {
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: capitalize;
+}
+
+.role-badge.admin {
+  background: rgba(255, 255, 255, 0.9);
+  color: #1565c0;
+}
+
+.role-badge.user {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+/* States */
+.dashboard-loading,
+.dashboard-error,
+.no-users {
+  text-align: center;
+  padding: 3rem 1rem;
+  opacity: 0.7;
+  font-size: 1rem;
+}
+
+.dashboard-error {
+  color: #ffb3b3;
+  opacity: 1;
+}
+
+.no-users {
+  padding: 2rem 1rem !important;
+}

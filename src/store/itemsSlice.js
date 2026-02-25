@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice} from '@reduxjs/toolkit';
 
 /**
  * Per-user favorites and search history.
@@ -53,12 +53,14 @@ const itemsSlice = createSlice({
 export const { toggleFavorite, removeFavorite, addToHistory, clearHistory } =
   itemsSlice.actions;
 
+const emptyArray = [];
+
 // Parameterised selectors
 export const selectFavorites = (userId) => (state) =>
-  userId ? (state.items.favorites[userId] ?? []) : [];
+  userId && state.items.favorites[userId] ? state.items.favorites[userId] : emptyArray;
 
 export const selectHistory = (userId) => (state) =>
-  userId ? (state.items.history[userId] ?? []) : [];
+  userId && state.items.history[userId] ? state.items.history[userId] : emptyArray;
 
 export const selectIsFavorited = (userId, label) => (state) =>
   selectFavorites(userId)(state).some((f) => f.label === label);

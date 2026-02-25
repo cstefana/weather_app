@@ -13,6 +13,7 @@ import {
   selectHistory,
 } from '../store/itemsSlice';
 import { toggleUnit, setForecastPage as setForecastPageAction, selectUnit, selectForecastPage } from '../store/uiSlice';
+import { selectUserRole } from '../store/authSlice';
 
 // Component
 export default function Weather({ onSignOut, onSignIn, userId }) {
@@ -33,6 +34,7 @@ export default function Weather({ onSignOut, onSignIn, userId }) {
   const forecastPage = useSelector(selectForecastPage);
   const favorites    = useSelector(selectFavorites(userId));
   const history      = useSelector(selectHistory(userId));
+  const userRole     = useSelector(selectUserRole);
   const isFavorited  = (label) => favorites.some((f) => f.label === label);
 
   const loadFavorite = async (fav) => {
@@ -322,6 +324,11 @@ export default function Weather({ onSignOut, onSignIn, userId }) {
           {onSignIn && (
             <button className="wx-signout-btn" onClick={onSignIn} title="Sign in">
               Sign In
+            </button>
+          )}
+          {userRole === 'admin' && (
+            <button className="wx-signout-btn" onClick={() => navigate('/dashboard')} title="Dashboard">
+              Dashboard
             </button>
           )}
           <button className="wx-signout-btn" onClick={() => navigate('/contact')} title="Contact">
