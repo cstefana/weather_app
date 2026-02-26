@@ -15,12 +15,20 @@ A React-based weather application built for my internship project. This applicat
 
 ## Screenshots
 
-<!-- Add screenshots of your application here -->
-| Dashboard | Weather Forecast |
-| :---: | :---: |
-| ![Dashboard](docs/images/dashboard.png) | ![Forecast](docs/images/forecast.png) |
-| Login Page | Favorites & History |
-| ![Login](docs/images/login.png) | ![Favorites](docs/images/favorites.png)<br>![History](docs/images/history.png) |
+### Dashboard
+![Dashboard](docs/images/dashboard.png)
+
+### Weather Forecast
+![Forecast](docs/images/forecast.png)
+
+### Login Page
+![Login](docs/images/login.png)
+
+### Favorites
+![Favorites](docs/images/favorites.png)
+
+### History
+![History](docs/images/history.png)
 
 ## Tech Stack
 
