@@ -1,17 +1,29 @@
-const cache = new Map();
+const CACHE_PREFIX = 'weather_cache:';
 
 function getCached(key) {
-  const entry = cache.get(key);
-  if (!entry) return null;
-  if (Date.now() > entry.expiresAt) {
-    cache.delete(key);
+  try {
+    const raw = localStorage.getItem(CACHE_PREFIX + key);
+    if (!raw) return null;
+    const entry = JSON.parse(raw);
+    if (Date.now() > entry.expiresAt) {
+      localStorage.removeItem(CACHE_PREFIX + key);
+      return null;
+    }
+    return entry.value;
+  } catch {
     return null;
   }
-  return entry.value;
 }
 
 function setCached(key, value, ttlMs) {
-  cache.set(key, { value, expiresAt: Date.now() + ttlMs });
+  try {
+    localStorage.setItem(
+      CACHE_PREFIX + key,
+      JSON.stringify({ value, expiresAt: Date.now() + ttlMs })
+    );
+  } catch {
+    // localStorage may be full or unavailable - silently skip caching
+  }
 }
 
 const TTL = {

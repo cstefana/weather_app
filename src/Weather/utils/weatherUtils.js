@@ -1,4 +1,4 @@
-// ── WMO Weather interpretation codes ─────────────────────────────────────────
+// WMO Weather interpretation codes
 export const WMO_DESCRIPTIONS = {
   0: 'Clear Sky', 1: 'Mainly Clear', 2: 'Partly Cloudy', 3: 'Overcast',
   45: 'Foggy', 48: 'Rime Fog',
