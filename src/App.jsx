@@ -28,7 +28,7 @@ export default function App() {
         .from('profiles')
         .select('role')
         .eq('id', userId)
-        .single();
+        .maybeSingle(); // using maybeSingle to avoid errors if no record is found
       
       if (!error && data) {
         console.log('Fetched user role:', data.role);

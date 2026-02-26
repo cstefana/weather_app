@@ -143,9 +143,48 @@
 }
 
 @media (max-width: 540px) {
-  .wx-location { font-size: 1rem; gap: 0.35rem; }
+  .wx-location {
+    font-size: 1rem;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
   .wx-unit-toggle { margin-left: 0; }
   .wx-signout-btn { margin-left: 0; font-size: 0.7rem; padding: 0.25rem 0.45rem; }
+  
+  /* Hide time and clock icon from location row on mobile */
+  .wx-location-icon,
+  .wx-local-time {
+    display: none;
+  }
+  
+  /* Push location name to its own full-width row below buttons */
+  .wx-location-name-wrap {
+    order: 1;
+    flex: 0 0 100%;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .wx-location {
+    margin-bottom: 0;
+  }
+  
+  .wx-current {
+    padding-top: 0.25rem;
+  }
+  
+  /* Show clock and time above feels like in current weather section */
+  .wx-current::before {
+    content: "🕐 " attr(data-time);
+    font-size: 0.875rem;
+    opacity: 0.75;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+  }
 }
 
 .wx-unit-toggle {
