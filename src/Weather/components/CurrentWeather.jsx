@@ -49,7 +49,7 @@ export default function CurrentWeather({
         </button>
       </div>
 
-      <section className="wx-current">
+      <section className="wx-current" data-time={localTime}>
         <div className="wx-main-icon">{wmoIcon(c.weather_code)}</div>
         <div className="wx-temp">{toDisplay(c.temperature_2m, unit)}</div>
         <div className="wx-condition">{wmoLabel(c.weather_code)}</div>
