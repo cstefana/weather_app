@@ -9,25 +9,25 @@ import HistorySection from './components/HistorySection';
 export default function Weather({ onSignOut, onSignIn, userId }) {
   const wx = useWeather(userId);
 
-  // Derived data 
+  // Derived data (conditional on weather data existence)
+  let c, d, h, isDay, currentHourPrefix, currentHourIdx, uvIndex, hourlyWindow;
+  
+  if (wx.weather) {
+    c = wx.weather.current;
+    d = wx.weather.daily;
+    h = wx.weather.hourly;
+    isDay = c.is_day === 1;
+    currentHourPrefix = c.time.slice(0, 13);
+    currentHourIdx = Math.max(0, h.time.findIndex((t) => t.slice(0, 13) === currentHourPrefix));
+    uvIndex = Math.round(h.uv_index?.[currentHourIdx] ?? 0);
+    hourlyWindow = h.time.slice(currentHourIdx, currentHourIdx + 24).map((t, i) => ({
+      time: t,
+      temp: h.temperature_2m[currentHourIdx + i],
+      code: h.weather_code[currentHourIdx + i],
+    }));
+  }
 
-  const c    = wx.weather.current;
-  const d    = wx.weather.daily;
-  const h    = wx.weather.hourly;
-  const isDay = c.is_day === 1;
-
-  const currentHourPrefix = c.time.slice(0, 13);
-  const currentHourIdx    = Math.max(0, h.time.findIndex((t) => t.slice(0, 13) === currentHourPrefix));
-  const uvIndex           = Math.round(h.uv_index?.[currentHourIdx] ?? 0);
-
-  const hourlyWindow = h.time.slice(currentHourIdx, currentHourIdx + 24).map((t, i) => ({
-    time: t,
-    temp: h.temperature_2m[currentHourIdx + i],
-    code: h.weather_code[currentHourIdx + i],
-  }));
-
-  // Loading / error states
-
+  // Render decisions and returns
   if (!wx.weather) {
     return (
       <div className="wx-page wx-idle">
@@ -58,9 +58,6 @@ export default function Weather({ onSignOut, onSignIn, userId }) {
       </div>
     );
   }
-
-
-  // Main render
 
   return (
     <div className={`wx-page ${isDay ? 'wx-day' : 'wx-night'}`}>
