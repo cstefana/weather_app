@@ -30,6 +30,9 @@ A React-based weather application built for my internship project. This applicat
 ### History
 ![History](docs/images/history.png)
 
+### Mobile
+![Mobile](docs/images/mobile.png)
+
 ## Tech Stack
 
 - **Frontend Framework**: React (with Vite)
