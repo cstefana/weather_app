@@ -569,19 +569,19 @@
   border-color: rgba(255,255,255,0.5);
 }
 
-/* forecast labels header (desktop only mostly) */
-.wx-forecast-labels {
-  display: none; /* hidden on mobile */
-  grid-template-columns: 5rem 3.5rem 8rem 9rem 11rem 1fr 1fr;
-  padding: 0 0.5rem 0.6rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  opacity: 0.6;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  margin-bottom: 0.25rem;
-  align-items: center;
+/* forecast labels header */
+  .wx-forecast-labels {
+    display: none; /* hidden on mobile */
+    grid-template-columns: minmax(4rem, 1.2fr) minmax(2.5rem, 0.8fr) minmax(5rem, 2fr) minmax(6rem, 2fr) minmax(7rem, 2.5fr) 1fr 1fr;
+    padding: 0.75rem 0.25rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 0.25rem;
+    align-items: center;
 }
 .wx-text-right { text-align: right; }
 
@@ -725,13 +725,14 @@
   .wx-fday-high, .wx-fday-low { text-align: center; }
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1080px) {
   .wx-page {
     display: grid;
-    grid-template-columns: 2fr 3fr;
+    grid-template-columns: minmax(320px, 2fr) minmax(460px, 3fr);
     align-items: start;
     padding: 2.5rem 3rem;
     gap: 1.5rem 2.5rem;
+    overflow-x: hidden;
   }
 
   .wx-page > .wx-history {
@@ -803,13 +804,15 @@
   .wx-forecast-labels { display: grid; }
 
   .wx-forecast-day {
-    grid-template-columns: 5rem 3.5rem 8rem 9rem 11rem 1fr 1fr;
+    grid-template-columns: minmax(4rem, 1.2fr) minmax(2.5rem, 0.8fr) minmax(5rem, 2fr) minmax(6rem, 2fr) minmax(7rem, 2.5fr) 1fr 1fr;
     justify-items: unset;
     align-items: center;
     border-bottom: 1px solid rgba(255,255,255,0.12);
     border-right: none;
     flex: unset;
-  /* Desktop: restore full row layout */
+    min-width: 0;
+    box-sizing: border-box;
+
   .wx-fday-sun {
     display: flex;
     flex-direction: row;
