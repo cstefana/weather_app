@@ -16,6 +16,28 @@ export default function Contact() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const form = formRef.current;
+    if (!form) return;
+
+    const name = form.name.value.trim();
+    const email = form.email.value.trim();
+    const subject = form.subject.value.trim();
+    const message = form.message.value.trim();
+
+    if (!name || !email || !subject || !message) {
+      setErrMsg('Please fill in all fields.');
+      setStatus('error');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setErrMsg('Please enter a valid email address.');
+      setStatus('error');
+      return;
+    }
+
     if (!SERVICE_ID || !TEMPLATE_ID || !PUBLIC_KEY) {
       setErrMsg('EmailJS is not configured. Add the VITE_EMAILJS_* variables to your .env file.');
       setStatus('error');
