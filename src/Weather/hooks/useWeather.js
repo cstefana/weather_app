@@ -135,7 +135,7 @@ export function useWeather(userId) {
 
   // Wrapped action dispatchers
 
-  const toggleFav      = (label, lat, lon) => dispatch(toggleFavoriteAction({ userId, label, lat, lon }));
+  const toggleFav      = (label, lat, lon)  => dispatch(toggleFavoriteAction({ userId, label, lat, lon }));
   const removeFav      = (label)            => dispatch(removeFavoriteAction({ userId, label }));
   const clearHist      = ()                 => dispatch(clearHistoryAction({ userId }));
   const setForecastP   = (p)                => dispatch(setForecastPageAction(p));
